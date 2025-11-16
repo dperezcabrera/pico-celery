@@ -21,7 +21,8 @@ keywords = [
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Framework :: celery",
+    "Framework :: AsyncIO",
+    "Topic :: System :: Distributed Computing",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
@@ -31,8 +32,9 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+    "Operating System :: OS Independent"
 ]
+
 
 dependencies = [
     "pico-ioc >= 2.1.2", 
