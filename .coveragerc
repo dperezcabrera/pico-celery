@@ -1,0 +1,17 @@
+[run]
+branch = True
+source =
+    pico_celery
+omit =
+    */_version.py
+
+[paths]
+pico_celery =
+    src/pico_celery
+    .tox/*/lib/*/site-packages/pico_celery
+    .tox/*/site-packages/pico_celery
+    */site-packages/pico_celery
+
+[report]
+show_missing = True
+

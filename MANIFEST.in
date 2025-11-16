@@ -1,0 +1,5 @@
+recursive-include src *.py
+recursive-include docs *.md
+include LICENSE
+include CHANGELOG.md
+include README.md
