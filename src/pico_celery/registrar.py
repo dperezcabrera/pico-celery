@@ -1,8 +1,8 @@
 import inspect
 import asyncio
-from typing import Any, Callable, Type, List, Tuple
+from typing import Any, Callable, Type
 from celery import Celery
-from pico_ioc import component, configure, PicoContainer, ContextConfig, init
+from pico_ioc import component, configure, PicoContainer
 from .decorators import PICO_CELERY_METHOD_META
 
 @component
@@ -17,7 +17,6 @@ class PicoTaskRegistrar:
         if locator is None:
             return
         metadata_map = getattr(locator, "_metadata", {})
-        count = 0
         for md in metadata_map.values():
             component_cls = getattr(md, "concrete_class", None)
             if not inspect.isclass(component_cls):
@@ -28,24 +27,26 @@ class PicoTaskRegistrar:
                 meta = getattr(method_func, PICO_CELERY_METHOD_META)
                 task_name = meta.get("name")
                 celery_options = meta.get("options", {})
-                wrapper = self._create_task_wrapper(component_cls, method_name, self._container, meta)
+                wrapper = self._create_task_wrapper(component_cls, method_name, self._container)
                 self._celery_app.task(name=task_name, **celery_options)(wrapper)
-                count += 1
 
-    def _create_task_wrapper(self, component_cls: Type, method_name: str, container: PicoContainer, meta: dict) -> Callable[..., Any]:
+    def _create_task_wrapper(self, component_cls: Type, method_name: str, container: PicoContainer) -> Callable[..., Any]:
         def sync_task_executor(*args: Any, **kwargs: Any) -> Any:
-            try:
-                loop = asyncio.get_running_loop()
-                raise RuntimeError("Cannot create new event loop when one is already running")
-            except RuntimeError as e:
-                if "no running event loop" not in str(e).lower():
-                    raise
-
             async def run_task_logic() -> Any:
                 component_instance = await container.aget(component_cls)
                 task_method = getattr(component_instance, method_name)
                 return await task_method(*args, **kwargs)
 
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+            if loop and loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as pool:
+                    return pool.submit(asyncio.run, run_task_logic()).result()
+            
             return asyncio.run(run_task_logic())
 
         return sync_task_executor
