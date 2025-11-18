@@ -5,11 +5,9 @@ from pico_ioc import component, MethodCtx, MethodInterceptor, intercepted_by
 
 PICO_CELERY_SENDER_META = "_pico_celery_sender_meta"
 
-
 @runtime_checkable
 class CeleryClient(Protocol):
     pass
-
 
 def send_task(
     name: str,
@@ -22,7 +20,6 @@ def send_task(
         setattr(func, PICO_CELERY_SENDER_META, metadata)
         return func
     return decorator
-
 
 def celery(
     cls: Optional[type] = None,
@@ -60,7 +57,6 @@ def celery(
     if cls is not None:
         return decorate(cls)
     return decorate
-
 
 @component
 class CeleryClientInterceptor(MethodInterceptor):
