@@ -23,50 +23,51 @@ It lets you define Celery tasks as **async methods inside IoC-managed components
 
 With pico-celery, you get predictable scoping, a clean separation of concerns, and a unified dependency model across HTTP, CLI, and background execution.
 
------
+---
 
 ## 🎯 Why pico-celery?
 
 Celery is powerful, but typical usage introduces:
 
-  * Module-level tasks
-  * Global Celery apps
-  * No dependency injection
-  * Shared mutable state
-  * Difficult testing setups
+* Module-level tasks
+* Global Celery apps
+* No dependency injection
+* Shared mutable state
+* Difficult testing setups
 
 **pico-celery fixes all of that**:
 
-  * Tasks become async methods inside components
-  * Dependency injection is constructor-based
-  * Task handlers are resolved through Pico-IoC
-  * Each execution receives a fresh instance (`prototype` scope)
-  * Workers bootstrap the IoC container exactly once
-  * No global state, no magic imports, no tight coupling
+* Tasks become async methods inside components
+* Dependency injection is constructor-based
+* Task handlers are resolved through Pico-IoC
+* Each execution receives a fresh instance (`prototype` scope)
+* Workers bootstrap the IoC container exactly once
+* No global state, no magic imports, no tight coupling
 
-| Feature | Default Celery | pico-celery |
-| :--- | :--- | :--- |
-| **Task Definition** | Global functions | Component methods |
-| **Dependency Injection** | None | Constructor injection |
-| **State Isolation** | Manual | Automatic (`prototype` scope) |
-| **Testability** | Hard | Container-managed |
-| **Async Tasks** | Requires custom pools | First-class async |
-| **Task Clients** | Manual (`app.send_task`) | Declarative (`@send_task`) |
+| Feature                  | Default Celery           | pico-celery                   |
+| :----------------------- | :----------------------- | :---------------------------- |
+| **Task Definition**      | Global functions         | Component methods             |
+| **Dependency Injection** | None                     | Constructor injection         |
+| **State Isolation**      | Manual                   | Automatic (`prototype` scope) |
+| **Testability**          | Hard                     | Container-managed             |
+| **Async Tasks**          | Requires custom pools    | First-class async             |
+| **Task Clients**         | Manual (`app.send_task`) | Declarative (`@send_task`)    |
 
------
+---
 
 ## 🧱 Core Features
 
-  * **`@task`** decorator for async component methods
-  * **`@celery`** and **`@send_task`** decorators for declarative, injectable clients
-  * Automatic task discovery inside Pico-IoC
-  * Dependency injection for all task handlers
-  * Container-scoped execution (`prototype` by default)
-  * Async-safe task execution wrappers
-  * Unified config via `CelerySettings`
-  * Method interception for client-side task sending
+* **`@task`** decorator for async component methods
+* **`@celery`** and **`@send_task`** decorators for declarative, injectable clients
+* **Auto-Discovery:** Automatically loaded when using `pico-stack` (v0.2.0+).
+* Automatic task discovery inside Pico-IoC
+* Dependency injection for all task handlers
+* Container-scoped execution (`prototype` by default)
+* Async-safe task execution wrappers
+* Unified config via `CelerySettings`
+* Method interception for client-side task sending
 
------
+---
 
 ## 📦 Installation
 
@@ -86,13 +87,28 @@ If using Redis (recommended):
 pip install celery[redis]
 ```
 
------
+---
+
+## 🔌 Zero-Config with Pico-Stack
+
+If you are using **pico-stack**, you do not need to manually register `"pico_celery"` in your modules list. It is automatically discovered via entry points.
+
+```python
+from pico_stack import init
+
+# pico_celery is automatically loaded!
+container = init(modules=[__name__, "my_app"])
+```
+
+*If you are using standard `pico-ioc`, follow the manual registration in the example below.*
+
+---
 
 ## 🚀 Quick Example
 
 This example shows both a *worker* and a *client* that sends the task.
 
-### 1\. Define a Task Component (Worker)
+### 1. Define a Task Component (Worker)
 
 This component defines the task logic and its dependencies.
 
@@ -100,7 +116,7 @@ This component defines the task logic and its dependencies.
 # my_app/tasks.py
 from pico_ioc import component
 from pico_celery import task
-from my_app.services import UserService # Your business logic
+from my_app.services import UserService  # Your business logic
 
 @component(scope="prototype")
 class UserTasks:
@@ -114,7 +130,7 @@ class UserTasks:
         return user.to_dict()
 ```
 
-### 2\. Define a Task Client (Sender)
+### 2. Define a Task Client (Sender)
 
 This is a declarative client that your web API (e.g., FastAPI) can inject and use.
 
@@ -122,7 +138,7 @@ This is a declarative client that your web API (e.g., FastAPI) can inject and us
 # my_app/clients.py
 from pico_celery import celery, send_task, CeleryClient
 
-@celery # Marks it as a pico-celery client component
+@celery  # Marks it as a pico-celery client component
 class UserTaskClient(CeleryClient):
 
     @send_task(name="tasks.create_user")
@@ -132,7 +148,7 @@ class UserTaskClient(CeleryClient):
         pass
 ```
 
-### 3\. Create the Worker Entrypoint
+### 3. Create the Worker Entrypoint
 
 This file (`worker.py`) is what Celery will use to boot up.
 
@@ -150,6 +166,7 @@ cfg = configuration(DictSource({
 }))
 
 # Modules to scan for @component, @task, @celery
+# NOTE: If using pico-stack, 'pico_celery' can be omitted here.
 modules = [
     "pico_celery",
     "my_app.services",
@@ -166,7 +183,7 @@ container = init(modules=modules, config=cfg)
 celery_app = container.get(Celery)
 ```
 
-### 4\. Run the Worker
+### 4. Run the Worker
 
 You will need an async pool like `eventlet` or `gevent`.
 
@@ -175,7 +192,7 @@ You will need an async pool like `eventlet` or `gevent`.
 celery -A my_app.worker:celery_app worker -P eventlet -l info
 ```
 
-### 5\. Use the Client in your API
+### 5. Use the Client in your API
 
 Your web API (e.g., FastAPI) can now inject the `UserTaskClient` and use it.
 
@@ -184,7 +201,7 @@ Your web API (e.g., FastAPI) can now inject the `UserTaskClient` and use it.
 from fastapi import FastAPI
 from pico_ioc import init
 from my_app.clients import UserTaskClient
-from my_app.worker import container # Reuse the worker's container
+from my_app.worker import container  # Reuse the worker's container
 
 app = FastAPI()
 
@@ -200,7 +217,7 @@ async def create_user_endpoint(username: str, email: str):
     return {"message": "Task submitted", "task_id": result.id}
 ```
 
------
+---
 
 ## 🔄 Task Execution Semantics (Worker)
 
@@ -222,12 +239,12 @@ await self.user_service.create(...)
 
 **Key benefits:**
 
-  * True async execution.
-  * No global state.
-  * Fully injected services.
-  * Guaranteed isolation via `prototype` scope.
+* True async execution.
+* No global state.
+* Fully injected services.
+* Guaranteed isolation via `prototype` scope.
 
------
+---
 
 ## 🧪 Testing with Pico-IoC
 
@@ -269,20 +286,20 @@ async def test_user_task_logic(mock_user_service):
     await container.cleanup_all_async()
 ```
 
------
+---
 
 ## ⚙️ How It Works
 
-  * **`@task`** (in `decorators.py`) flags `async` methods inside components.
-  * **`PicoTaskRegistrar`** (in `registrar.py`) is a component that scans IoC metadata upon configuration.
-  * For each `@task` method found, it generates an async *wrapper*.
-  * This *wrapper* is what gets registered with Celery (`celery_app.task(...)`).
-  * When Celery executes the task, it invokes the *wrapper*, which in turn uses `await container.aget(Component)` to get a fresh instance (thanks to `prototype`) and then calls your original method, ensuring DI.
-  * **`@send_task`** (in `client.py`) flags methods on client classes.
-  * **`@celery`** (in `client.py`) applies an interceptor (`CeleryClientInterceptor`) to all methods flagged with `@send_task`.
-  * When you call a client method (e.g., `client.create_user(...)`), the interceptor activates, extracts the `@send_task` metadata (like the task name) and the call arguments, and executes `self._celery.send_task(...)` on your behalf.
+* **`@task`** (in `decorators.py`) flags `async` methods inside components.
+* **`PicoTaskRegistrar`** (in `registrar.py`) is a component that scans IoC metadata upon configuration.
+* For each `@task` method found, it generates an async *wrapper*.
+* This *wrapper* is what gets registered with Celery (`celery_app.task(...)`).
+* When Celery executes the task, it invokes the *wrapper*, which in turn uses `await container.aget(Component)` to get a fresh instance (thanks to `prototype`) and then calls your original method, ensuring DI.
+* **`@send_task`** (in `client.py`) flags methods on client classes.
+* **`@celery`** (in `client.py`) applies an interceptor (`CeleryClientInterceptor`) to all methods flagged with `@send_task`.
+* When you call a client method (e.g., `client.create_user(...)`), the interceptor activates, extracts the `@send_task` metadata (like the task name) and the call arguments, and executes `self._celery.send_task(...)` on your behalf.
 
------
+---
 
 ## 💡 Architecture Overview
 
@@ -334,8 +351,9 @@ async def test_user_task_logic(mock_user_service):
        └─────────────────────────────┘
 ```
 
------
+---
 
 ## 📝 License
 
 MIT
+
