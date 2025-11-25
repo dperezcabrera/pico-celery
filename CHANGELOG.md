@@ -7,6 +7,16 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.2.0] - 2025-11-25
+
+### Added
+- **Pico-Stack Auto-Discovery**: Added the standard `entry_point` definition (`pico_stack.modules`). Now, when using `pico-stack`, this library is automatically discovered and loaded without needing to manually add `"pico_celery"` to your modules list.
+
+### Changed
+- **Core Upgrade**: Bumped minimum requirement to `pico-ioc >= 2.1.3`. This aligns `pico-celery` with the latest memory management improvements in the IoC container (specifically the removal of LRU eviction in Scopes), ensuring greater stability for long-running worker processes.
+
+---
+
 ## [0.1.1] - 2025-11-18
 
 ### Fixed
