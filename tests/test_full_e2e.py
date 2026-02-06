@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 import subprocess
 import time
 import sys

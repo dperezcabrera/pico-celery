@@ -1,5 +1,4 @@
 import pytest
-import asyncio
 from pico_celery.decorators import task, PICO_CELERY_METHOD_META
 
 def test_task_decorator_requires_async():

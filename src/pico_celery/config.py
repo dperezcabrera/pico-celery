@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 from pico_ioc import configured
 
 @configured(target="self", prefix="celery", mapping="tree")
