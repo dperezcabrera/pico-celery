@@ -15,7 +15,7 @@
 
 It lets you define Celery tasks as **async methods inside IoC-managed components**, with automatic discovery, dependency injection, and container-scoped execution.
 
-> 🐍 Requires Python 3.10+
+> 🐍 Requires Python 3.11+
 > ⚡ **Async-native**: tasks run as real `async def`, with no thread pools
 > 🔧 Works with Celery 5.x
 > 🧩 Full constructor-based DI
@@ -59,7 +59,7 @@ Celery is powerful, but typical usage introduces:
 
 * **`@task`** decorator for async component methods
 * **`@celery`** and **`@send_task`** decorators for declarative, injectable clients
-* **Auto-Discovery:** Automatically loaded when using `pico-stack` (v0.2.0+).
+* **Auto-Discovery:** Automatically discovered via entry points when using [pico-boot](https://github.com/dperezcabrera/pico-boot).
 * Automatic task discovery inside Pico-IoC
 * Dependency injection for all task handlers
 * Container-scoped execution (`prototype` by default)
@@ -86,21 +86,6 @@ If using Redis (recommended):
 ```bash
 pip install celery[redis]
 ```
-
----
-
-## 🔌 Zero-Config with Pico-Stack
-
-If you are using **pico-stack**, you do not need to manually register `"pico_celery"` in your modules list. It is automatically discovered via entry points.
-
-```python
-from pico_stack import init
-
-# pico_celery is automatically loaded!
-container = init(modules=[__name__, "my_app"])
-```
-
-*If you are using standard `pico-ioc`, follow the manual registration in the example below.*
 
 ---
 
@@ -166,7 +151,6 @@ cfg = configuration(DictSource({
 }))
 
 # Modules to scan for @component, @task, @celery
-# NOTE: If using pico-stack, 'pico_celery' can be omitted here.
 modules = [
     "pico_celery",
     "my_app.services",
@@ -215,6 +199,19 @@ async def create_user_endpoint(username: str, email: str):
     result = client.create_user(username, email)
     
     return {"message": "Task submitted", "task_id": result.id}
+```
+
+---
+
+## 🔌 Even Simpler with pico-boot
+
+If you use [pico-boot](https://github.com/dperezcabrera/pico-boot), you don't need to register `"pico_celery"` in your modules list. It is automatically discovered via entry points:
+
+```python
+from pico_boot import init
+
+# pico_celery is automatically loaded — no need to include it in modules!
+container = init(modules=["my_app.services", "my_app.tasks", "my_app.clients"], config=cfg)
 ```
 
 ---
@@ -350,6 +347,19 @@ async def test_user_task_logic(mock_user_service):
        │       Broker (e.g., Redis)  │
        └─────────────────────────────┘
 ```
+
+---
+
+## 🤖 Claude Code Skills
+
+This project includes pre-designed skills for [Claude Code](https://claude.ai/claude-code), enabling AI-assisted development with pico-celery patterns.
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| **Pico Celery Task** | `/pico-celery-task` | Creates Celery tasks integrated with pico-ioc |
+| **Pico Test Generator** | `/pico-tests` | Generates tests for pico-framework components |
+
+See [Skills documentation](docs/skills.md) for full details and installation instructions.
 
 ---
 

@@ -2,6 +2,7 @@ import inspect
 from typing import Any, Callable, Optional, runtime_checkable, Protocol
 from celery import Celery
 from pico_ioc import component, MethodCtx, MethodInterceptor, intercepted_by
+from .decorators import PICO_CELERY_METHOD_META
 
 PICO_CELERY_SENDER_META = "_pico_celery_sender_meta"
 
@@ -35,8 +36,7 @@ def celery(
             if hasattr(method, PICO_CELERY_SENDER_META):
                 has_send_tasks = True
                 setattr(method, "_needs_interception", True)
-            
-            from .decorators import PICO_CELERY_METHOD_META
+
             if hasattr(method, PICO_CELERY_METHOD_META):
                 has_worker_tasks = True
         
@@ -44,9 +44,6 @@ def celery(
             raise ValueError(f"No @send_task or @task methods found on {c.__name__}")
         
         if has_send_tasks:
-            if not issubclass(c, CeleryClient):
-                raise TypeError(f"{c.__name__} with @send_task methods must inherit from CeleryClient")
-            
             for name, method in inspect.getmembers(c, inspect.isfunction):
                 if getattr(method, "_needs_interception", False):
                     intercepted_method = intercepted_by(CeleryClientInterceptor)(method)

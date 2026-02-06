@@ -7,6 +7,22 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.2.1] - 2025-02-04
+
+### Changed
+- **Code Quality**: Removed dead code in `@celery` decorator (unreachable `CeleryClient` inheritance check).
+- **Documentation**: Standardized MkDocs configuration with Material theme (indigo), git-revision-date-localized plugin, and math extensions.
+- **CI/CD**: Unified GitHub Actions workflow for documentation deployment.
+
+### Fixed
+- **Test Coverage**: Achieved 100% test coverage for `client.py` by adding edge case tests.
+
+### Added
+- `tests/test_client_coverage.py`: 9 new tests for `send_task` decorator, `@celery` decorator, and `CeleryClientInterceptor`.
+- `tests/test_registrar_coverage.py`: 5 new tests for `PicoTaskRegistrar` edge cases.
+
+---
+
 ## [0.2.0] - 2025-11-25
 
 ### Added

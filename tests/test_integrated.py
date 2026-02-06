@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from celery import Celery
 from typing import Any
@@ -52,7 +53,6 @@ async def test_pico_celery_integration_registers_and_executes_task() -> None:
 
     task_obj = celery_app.tasks["sample.task"]
     
-    import asyncio
     result = await asyncio.get_event_loop().run_in_executor(
         None, 
         task_obj.run, 
