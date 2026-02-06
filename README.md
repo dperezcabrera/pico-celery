@@ -8,6 +8,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dperezcabrera_pico-celery\&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dperezcabrera_pico-celery)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=dperezcabrera_pico-celery\&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=dperezcabrera_pico-celery)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=dperezcabrera_pico-celery\&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=dperezcabrera_pico-celery)
+[![Docs](https://img.shields.io/badge/Docs-pico--celery-blue?style=flat&logo=readthedocs&logoColor=white)](https://dperezcabrera.github.io/pico-celery/)
 
 # Pico-Celery
 
