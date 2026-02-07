@@ -1,7 +1,8 @@
-from typing import Any, Callable
 import inspect
+from typing import Any, Callable
 
 PICO_CELERY_METHOD_META = "_pico_celery_method_meta"
+
 
 def task(name: str, **celery_options: Any) -> Callable[[Callable], Callable]:
     def decorator(func: Callable) -> Callable:
@@ -10,4 +11,5 @@ def task(name: str, **celery_options: Any) -> Callable[[Callable], Callable]:
         metadata = {"name": name, "options": celery_options}
         setattr(func, PICO_CELERY_METHOD_META, metadata)
         return func
+
     return decorator

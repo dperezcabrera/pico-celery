@@ -1,9 +1,12 @@
-import inspect
 import asyncio
+import inspect
 from typing import Any, Callable, Type
+
 from celery import Celery
-from pico_ioc import component, configure, PicoContainer
+from pico_ioc import PicoContainer, component, configure
+
 from .decorators import PICO_CELERY_METHOD_META
+
 
 @component
 class PicoTaskRegistrar:
@@ -30,7 +33,9 @@ class PicoTaskRegistrar:
                 wrapper = self._create_task_wrapper(component_cls, method_name, self._container)
                 self._celery_app.task(name=task_name, **celery_options)(wrapper)
 
-    def _create_task_wrapper(self, component_cls: Type, method_name: str, container: PicoContainer) -> Callable[..., Any]:
+    def _create_task_wrapper(
+        self, component_cls: Type, method_name: str, container: PicoContainer
+    ) -> Callable[..., Any]:
         def sync_task_executor(*args: Any, **kwargs: Any) -> Any:
             async def run_task_logic() -> Any:
                 component_instance = await container.aget(component_cls)
@@ -44,9 +49,10 @@ class PicoTaskRegistrar:
 
             if loop and loop.is_running():
                 import concurrent.futures
+
                 with concurrent.futures.ThreadPoolExecutor() as pool:
                     return pool.submit(asyncio.run, run_task_logic()).result()
-            
+
             return asyncio.run(run_task_logic())
 
         return sync_task_executor
