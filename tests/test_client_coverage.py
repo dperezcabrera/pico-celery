@@ -1,12 +1,15 @@
 """Tests for client.py edge cases and error handling."""
-import pytest
+
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from pico_celery.client import (
-    send_task,
-    celery,
+    PICO_CELERY_SENDER_META,
     CeleryClient,
     CeleryClientInterceptor,
-    PICO_CELERY_SENDER_META,
+    celery,
+    send_task,
 )
 
 
@@ -21,12 +24,14 @@ class TestSendTaskDecorator:
     def test_send_task_on_class_raises_type_error(self):
         """@send_task raises TypeError when applied to class."""
         with pytest.raises(TypeError, match="can only decorate methods or functions"):
+
             @send_task(name="test_task")
             class NotAFunction:
                 pass
 
     def test_send_task_sets_metadata(self):
         """@send_task sets metadata on decorated function."""
+
         @send_task(name="my_task", queue="high")
         def my_func():
             pass
@@ -42,6 +47,7 @@ class TestCeleryDecorator:
     def test_celery_without_tasks_raises_value_error(self):
         """@celery raises ValueError when class has no task methods."""
         with pytest.raises(ValueError, match="No @send_task or @task methods found"):
+
             @celery
             class NoTasks(CeleryClient):
                 def regular_method(self):
@@ -49,6 +55,7 @@ class TestCeleryDecorator:
 
     def test_celery_with_send_task_decorates_class(self):
         """@celery with @send_task methods decorates the class as a component."""
+
         @celery
         class TaskClient:
             @send_task(name="test_task")
@@ -73,6 +80,7 @@ class TestCeleryDecorator:
 
     def test_celery_as_decorator_factory(self):
         """@celery() can be used with parentheses."""
+
         @celery(scope="prototype")
         class TaskClient(CeleryClient):
             @send_task(name="test_task")

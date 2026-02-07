@@ -1,6 +1,8 @@
 from celery import Celery
 from pico_ioc import factory, provides
+
 from .config import CelerySettings
+
 
 @factory
 class CeleryFactory:

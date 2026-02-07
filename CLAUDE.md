@@ -11,7 +11,7 @@ pico-celery provides Celery integration for pico-ioc. It uses:
 ## Key Reminders
 
 - pico-ioc dependency: `>= 2.2.0`
-- `version_scheme = "post-release"` (clean versions on tag)
+- **NEVER change `version_scheme`** in pyproject.toml. It MUST remain `"post-release"`. Changing it to `"guess-next-dev"` causes `.dev0` versions to leak to PyPI. This was already fixed once — do not revert it.
 - requires-python >= 3.11
 - Commit messages: one line only
 - Two distinct sides: worker (@task) and client (@send_task/@celery)

@@ -1,25 +1,9 @@
-from typing import Any
 from celery import Celery
-from pico_celery.decorators import task, PICO_CELERY_METHOD_META
+
+from conftest import FakeContainer
+from pico_celery.decorators import PICO_CELERY_METHOD_META, task
 from pico_celery.registrar import PicoTaskRegistrar
 
-class FakeMetadata:
-    def __init__(self, concrete_class: type):
-        self.concrete_class = concrete_class
-
-class FakeLocator:
-    def __init__(self, concrete_class: type):
-        self._metadata = {"comp": FakeMetadata(concrete_class)}
-
-class FakeContainer:
-    def __init__(self, concrete_class: type):
-        self._locator = FakeLocator(concrete_class)
-        self._concrete_class = concrete_class
-
-    async def aget(self, cls: type) -> Any:
-        if cls is self._concrete_class:
-            return cls()
-        raise RuntimeError("Unknown class requested")
 
 class SampleComponent:
     def __init__(self) -> None:
@@ -29,6 +13,7 @@ class SampleComponent:
     async def do_work(self, value: int) -> int:
         self.called = True
         return value * 2
+
 
 def test_registrar_registers_task():
     celery_app = Celery("test_app", broker="memory://", backend="rpc://")

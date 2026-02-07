@@ -1,25 +1,19 @@
-import pytest
-import subprocess
-import time
-import sys
 import os
+
+import pytest
 from celery import Celery
-from pico_ioc import init, configuration, DictSource, component
-from pico_celery import task, celery, send_task, CeleryClient
+from pico_ioc import DictSource, component, configuration, init
+
+from pico_celery import CeleryClient, celery, send_task, task
 
 TEST_DB_PATH = "/tmp/celery_test_e2e_broker.db"
 BROKER_URL = f"sqla+sqlite:///{TEST_DB_PATH}"
 BACKEND_URL = f"db+sqlite:///{TEST_DB_PATH}"
 
 cfg = configuration(
-    DictSource({
-        "celery": {
-            "broker_url": BROKER_URL,
-            "backend_url": BACKEND_URL,
-            "task_track_started": False
-        }
-    })
+    DictSource({"celery": {"broker_url": BROKER_URL, "backend_url": BACKEND_URL, "task_track_started": False}})
 )
+
 
 @component(scope="prototype")
 class UserTasks:
@@ -39,49 +33,32 @@ class UserTaskClient(CeleryClient):
 class UserService:
     def __init__(self, client: UserTaskClient):
         self.client = client
-    
+
     def create_user_async(self, username: str, email: str):
         return self.client.create_user(username, email)
 
-container = init(
-    modules=["pico_celery", __name__],
-    config=cfg
-)
+
+container = init(modules=["pico_celery", __name__], config=cfg)
 
 celery_app = container.get(Celery)
 
-@pytest.fixture
-def setup_sqlite_broker(autouse=True):
+
+@pytest.fixture(autouse=True)
+def cleanup_sqlite_broker():
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
     yield
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
 
+
 @pytest.mark.asyncio
-async def test_full_declarative_client_e2e(setup_sqlite_broker):
-    python_path = os.pathsep.join([".", "src"])
-
-    worker = subprocess.Popen(
-        [
-            sys.executable,
-            "-m", "celery",
-            "-A", "tests.test_full_e2e:celery_app",
-            "worker",
-            "-P", "solo",
-            "-l", "info"
-        ],
-        env={**os.environ, "PYTHONPATH": python_path}
-    )
-
-    time.sleep(3.0)
+async def test_full_declarative_client_e2e(celery_worker_process):
+    worker = celery_worker_process("tests.test_full_e2e:celery_app")
 
     service = await container.aget(UserService)
     async_result = service.create_user_async("alice", "alice@example.com")
-    
-    result = async_result.get(timeout=10)
 
-    worker.terminate()
-    worker.wait(timeout=5)
+    result = async_result.get(timeout=10)
 
     assert result == {"id": 123, "username": "alice", "email": "alice@example.com"}

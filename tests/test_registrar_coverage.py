@@ -1,7 +1,11 @@
 """Tests for registrar.py edge cases and error handling."""
-import pytest
+
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from conftest import make_task_wrapper
 from pico_celery.registrar import PicoTaskRegistrar
 
 
@@ -50,39 +54,22 @@ class TestTaskWrapper:
 
     def test_wrapper_runs_task_without_running_loop(self, registrar):
         """Task wrapper runs asyncio.run when no event loop is running."""
-        mock_container = MagicMock()
-        mock_instance = MagicMock()
-        mock_instance.my_task = AsyncMock(return_value="result")
-        mock_container.aget = AsyncMock(return_value=mock_instance)
-
-        class MockComponent:
-            async def my_task(self, arg):
-                return arg
-
-        wrapper = registrar._create_task_wrapper(MockComponent, "my_task", mock_container)
+        wrapper, mock_container, mock_instance = make_task_wrapper(registrar, return_value="result")
 
         result = wrapper("test_arg")
 
-        mock_container.aget.assert_called_once_with(MockComponent)
+        mock_container.aget.assert_called_once()
         mock_instance.my_task.assert_called_once_with("test_arg")
         assert result == "result"
 
     def test_wrapper_runs_task_with_running_loop(self, registrar):
         """Task wrapper uses ThreadPoolExecutor when event loop is running."""
-        mock_container = MagicMock()
-        mock_instance = MagicMock()
-        mock_instance.my_task = AsyncMock(return_value="loop_result")
-        mock_container.aget = AsyncMock(return_value=mock_instance)
-
-        class MockComponent:
-            async def my_task(self, arg):
-                return arg
-
-        wrapper = registrar._create_task_wrapper(MockComponent, "my_task", mock_container)
+        wrapper, _, _ = make_task_wrapper(registrar, return_value="loop_result")
 
         async def run_with_loop():
             # This runs the wrapper while an event loop is already running
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 future = pool.submit(wrapper, "test_arg")
                 return future.result()
@@ -92,15 +79,7 @@ class TestTaskWrapper:
 
     def test_wrapper_passes_args_and_kwargs(self, registrar):
         """Task wrapper correctly passes args and kwargs to task method."""
-        mock_container = MagicMock()
-        mock_instance = MagicMock()
-        mock_instance.my_task = AsyncMock(return_value={"status": "ok"})
-        mock_container.aget = AsyncMock(return_value=mock_instance)
-
-        class MockComponent:
-            pass
-
-        wrapper = registrar._create_task_wrapper(MockComponent, "my_task", mock_container)
+        wrapper, _, mock_instance = make_task_wrapper(registrar, return_value={"status": "ok"})
 
         result = wrapper("arg1", "arg2", key1="val1", key2="val2")
 

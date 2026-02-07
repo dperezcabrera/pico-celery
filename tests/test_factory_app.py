@@ -1,6 +1,8 @@
 from celery import Celery
+
 from pico_celery.config import CelerySettings
 from pico_celery.factory import CeleryFactory
+
 
 def test_celery_factory_uses_settings():
     settings = CelerySettings(
