@@ -351,16 +351,23 @@ async def test_user_task_logic(mock_user_service):
 
 ---
 
-## 🤖 Claude Code Skills
+## Claude Code Skills
 
-This project includes pre-designed skills for [Claude Code](https://claude.ai/claude-code), enabling AI-assisted development with pico-celery patterns.
+Install [Claude Code](https://code.claude.com) skills for AI-assisted development with pico-celery:
 
-| Skill | Command | Description |
-|-------|---------|-------------|
-| **Pico Celery Task** | `/pico-celery-task` | Creates Celery tasks integrated with pico-ioc |
-| **Pico Test Generator** | `/pico-tests` | Generates tests for pico-framework components |
+```bash
+curl -sL https://raw.githubusercontent.com/dperezcabrera/pico-skills/main/install.sh | bash -s -- celery
+```
 
-See [Skills documentation](docs/skills.md) for full details and installation instructions.
+| Command | Description |
+|---------|-------------|
+| `/add-celery-task` | Add Celery worker tasks and client senders |
+| `/add-component` | Add components, factories, interceptors, settings |
+| `/add-tests` | Generate tests for pico-framework components |
+
+All skills: `curl -sL https://raw.githubusercontent.com/dperezcabrera/pico-skills/main/install.sh | bash`
+
+See [pico-skills](https://github.com/dperezcabrera/pico-skills) for details.
 
 ---
 
