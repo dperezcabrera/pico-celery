@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from celery import Celery
 from pico_ioc import DictSource, component, configuration, init
@@ -37,15 +35,6 @@ class TaskComponent:
 container = init(modules=["pico_celery", __name__], config=cfg)
 
 celery_app = container.get(Celery)
-
-
-@pytest.fixture(autouse=True)
-def cleanup_sqlite_broker():
-    if os.path.exists(TEST_DB_PATH):
-        os.remove(TEST_DB_PATH)
-    yield
-    if os.path.exists(TEST_DB_PATH):
-        os.remove(TEST_DB_PATH)
 
 
 @pytest.mark.asyncio

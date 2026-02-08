@@ -72,6 +72,23 @@ def celery_worker_process():
         w.wait(timeout=5)
 
 
+# ── SQLite broker cleanup fixture (shared by e2e tests) ──
+
+
+@pytest.fixture(autouse=True)
+def cleanup_sqlite_broker(request):
+    """Clean up SQLite broker DB file before and after each test."""
+    db_path = getattr(request.module, "TEST_DB_PATH", None)
+    if db_path is None:
+        yield
+        return
+    if os.path.exists(db_path):
+        os.remove(db_path)
+    yield
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
+
 # ── Mock task-wrapper helper (test_registrar_coverage) ──
 
 
