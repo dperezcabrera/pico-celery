@@ -56,7 +56,10 @@ pip install pico-celery
 
 - [Getting Started](getting-started.md) - Installation and basic usage
 - [Architecture](architecture.md) - Design and implementation details
-- [FAQ](faq.md) - Frequently asked questions
+- [How-To: Retry with Backoff](how-to/retry.md) - Configure retry and exponential backoff
+- [How-To: Testing](how-to/testing.md) - Test tasks without a broker
+- [How-To: Periodic Tasks](how-to/periodic-tasks.md) - Set up scheduled tasks with Celery Beat
+- [FAQ](faq.md) - Frequently asked questions and troubleshooting
 
 ## License
 
