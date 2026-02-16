@@ -1,4 +1,4 @@
-# 🧭 Architecture Overview — pico-celery
+# Architecture Overview -- pico-celery
 
 `pico-celery` is an integration layer that connects **Pico-IoC**'s inversion-of-control container with **Celery 5** background task execution.
 
@@ -7,7 +7,7 @@ It is a **dual-purpose** library:
 1. **Worker-Side:** Ensures task handlers (`@task`) are resolved and executed through the IoC container.
 2. **Client-Side:** Provides declarative, injectable clients (`@celery`, `@send_task`) for sending tasks without tight coupling to the Celery app.
 
-Its purpose is not to replace Celery — but to treat task execution and task sending as **IoC-managed dependencies**.
+Its purpose is not to replace Celery -- but to treat task execution and task sending as **IoC-managed dependencies**.
 
 ---
 
@@ -15,34 +15,47 @@ Its purpose is not to replace Celery — but to treat task execution and task se
 
 The library integrates Celery as a transport layer, managed by Pico-IoC.
 
-```
-                                ┌───────────────────────────┐
-                                │   Your Application (Web)  │
-                                └─────────────┬─────────────┘
-                                              │
-                                     (Injects & Calls)
-                                              │
-┌─────────────────────────────┐ ┌─────────────▼─────────────┐
-│      pico-celery Client     │ │     pico-celery Worker    │
-│ (@celery, @send_task,       │ │ (@task, Registrar,        │
-│      CeleryClientInterceptor) │ │       IoC Wrapper)          │
-└──────────────┬──────────────┘ └─────────────┬─────────────┘
-               │                              │
-(Intercepts & Sends Task)      (Receives & Resolves Task)
-               │                              │
-               └───────────►┌─────────────────▼───┐
-                            │       Celery        │
-                            │ (Task Queue Engine) │
-                            └───────────┬─────────┘
-                                        │
-                         (IoC Resolution & Execution)
-                                        │
-                            ┌───────────▼─────────┐
-                            │       Pico-IoC      │
-                            │ (Container/Scopes/DI) │
-                            └───────────┬─────────┘
-                                        │
-                           (Business Services, Repos)
+### Client-Server Architecture
+
+```mermaid
+graph TB
+    App["Your Application<br/>(FastAPI / CLI / Service)"]
+
+    subgraph ClientSide["Client Side"]
+        CC["@celery class"]
+        ST["@send_task methods"]
+        INT["CeleryClientInterceptor"]
+    end
+
+    subgraph WorkerSide["Worker Side"]
+        TD["@task methods"]
+        REG["PicoTaskRegistrar"]
+        WRAP["Sync Wrapper"]
+    end
+
+    subgraph Infrastructure
+        CELERY["Celery App<br/>(Broker + Backend)"]
+        IOC["Pico-IoC Container<br/>(Scopes / DI)"]
+        SETTINGS["CelerySettings"]
+        FACTORY["CeleryFactory"]
+    end
+
+    subgraph Business["Business Layer"]
+        SVC["Services / Repos"]
+    end
+
+    App --> CC
+    CC --> ST
+    ST --> INT
+    INT -->|"send_task()"| CELERY
+    CELERY -->|"delivers message"| WRAP
+    WRAP --> REG
+    REG -->|"container.aget()"| IOC
+    IOC -->|"injects"| TD
+    TD --> SVC
+    SETTINGS --> FACTORY
+    FACTORY -->|"creates"| CELERY
+    IOC -->|"provides"| SVC
 ```
 
 ---
@@ -66,35 +79,32 @@ This section contrasts the `pico-celery` design with the standard approach to us
 
 This flow describes what happens *inside a Celery worker* when a task is received.
 
-```
-Task Received from Broker
-│
-▼
-┌───────────────────┐
-│ Celery Worker     │ ← Executes the async wrapper
-│ (eventlet/gevent) │   registered by PicoTaskRegistrar
-└───────┬───────────┘
-        │
-        ▼
-┌──────────────────────────────────────────────┐
-│ [Pico-IoC Container]                         │
-│ 1. `await container.aget(ComponentClass)`    │
-│ 2. Injects dependencies (e.g., UserService)  │
-│ 3. Returns new `prototype` instance          │
-└──────────────────────────────────────────────┘
-        │
-        ▼
-┌──────────────────────────────────────────────┐
-│ [Component Instance]                         │
-│ `await instance.method(*args, **kwargs)`     │
-│ (Executes your async task logic)             │
-└──────────────────────────────────────────────┘
-        │
-        ▼
-Result returned to Celery backend
-│
-▼
-Pico-IoC scope cleanup (`__aclose__`)
+### Task Registration and Execution Flow
+
+```mermaid
+sequenceDiagram
+    participant Broker as Message Broker
+    participant Worker as Celery Worker
+    participant Wrapper as sync_task_executor
+    participant Container as PicoContainer
+    participant Component as Component Instance
+    participant Backend as Result Backend
+
+    Broker->>Worker: Deliver task message
+    Worker->>Wrapper: Call registered wrapper(*args, **kwargs)
+
+    rect rgb(230, 240, 255)
+        note right of Wrapper: Async execution block
+        Wrapper->>Container: await container.aget(ComponentClass)
+        Container->>Container: Resolve dependencies (DI)
+        Container-->>Wrapper: Fresh prototype instance
+        Wrapper->>Component: await instance.method(*args, **kwargs)
+        Component-->>Wrapper: Return result
+    end
+
+    Wrapper-->>Worker: Return result
+    Worker->>Backend: Store result
+    note over Container: Scope cleanup (__aclose__)
 ```
 
 ---
@@ -103,37 +113,25 @@ Pico-IoC scope cleanup (`__aclose__`)
 
 This flow describes what happens *in your web app* (or other service) when you call a client method.
 
-```
-Your Code (e.g., FastAPI endpoint)
-│
-▼
-┌──────────────────────────────────────────────┐
-│ `await container.aget(UserTaskClient)`       │
-│ (IoC resolves the client component)          │
-└──────────────────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────┐
-│ `client.create_user("alice", ...)`           │
-│ (Your code calls the intercepted method)     │
-└──────────────────────────────────────────────┘
-│
-▼
-┌────────────────────────────────────────────────┐
-│ [CeleryClientInterceptor]                       │
-│ 1. Intercepts the call                          │
-│ 2. Reads `@send_task` metadata ("tasks.create_user") │
-│ 3. Gets injected `Celery` app                   │
-└────────────────────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────┐
-│ `celery_app.send_task(...)`                  │
-│ (Interceptor sends the task to the broker)   │
-└──────────────────────────────────────────────┘
-│
-▼
-Task Sent to Broker
+```mermaid
+sequenceDiagram
+    participant Code as Your Code<br/>(FastAPI / CLI)
+    participant Container as PicoContainer
+    participant Client as @celery Client
+    participant Interceptor as CeleryClientInterceptor
+    participant CeleryApp as Celery App
+    participant Broker as Message Broker
+
+    Code->>Container: await container.aget(UserTaskClient)
+    Container-->>Code: Client instance (singleton)
+    Code->>Client: client.create_user("alice", ...)
+    Client->>Interceptor: invoke(ctx, call_next)
+    Interceptor->>Interceptor: Read @send_task metadata
+    Interceptor->>CeleryApp: send_task("tasks.create_user", args, kwargs, **options)
+    CeleryApp->>Broker: Publish task message
+    CeleryApp-->>Interceptor: AsyncResult
+    Interceptor-->>Client: AsyncResult
+    Client-->>Code: AsyncResult
 ```
 
 ---
@@ -263,6 +261,41 @@ Celery workers do not have a natural async request/response lifecycle.
   * Singletons are closed cleanly (e.g., DB pools)
 
 This prevents resource leaks.
+
+### Worker Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Starting: celery worker start
+
+    state Starting {
+        [*] --> InitContainer: Create PicoContainer
+        InitContainer --> CreateCelery: CeleryFactory.create_celery_app()
+        CreateCelery --> RegisterTasks: PicoTaskRegistrar.register_tasks()
+        RegisterTasks --> [*]
+    }
+
+    Starting --> Ready: All tasks registered
+
+    state Ready {
+        [*] --> Idle
+        Idle --> Executing: Task received from broker
+        Executing --> ResolveDI: container.aget(ComponentClass)
+        ResolveDI --> RunMethod: await instance.method()
+        RunMethod --> Cleanup: Scope cleanup
+        Cleanup --> Idle: Return result to backend
+    }
+
+    Ready --> ShuttingDown: SIGTERM / SIGINT
+
+    state ShuttingDown {
+        [*] --> DrainTasks: Wait for in-flight tasks
+        DrainTasks --> CleanupSingletons: container.cleanup_all_async()
+        CleanupSingletons --> [*]
+    }
+
+    ShuttingDown --> [*]: Worker stopped
+```
 
 ---
 
