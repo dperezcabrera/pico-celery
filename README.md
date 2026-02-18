@@ -351,9 +351,9 @@ async def test_user_task_logic(mock_user_service):
 
 ---
 
-## Claude Code Skills
+## AI Coding Skills
 
-Install [Claude Code](https://code.claude.com) skills for AI-assisted development with pico-celery:
+Install [Claude Code](https://code.claude.com) or [OpenAI Codex](https://openai.com/index/introducing-codex/) skills for AI-assisted development with pico-celery:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/dperezcabrera/pico-skills/main/install.sh | bash -s -- celery
