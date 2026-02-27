@@ -212,7 +212,7 @@ If you use [pico-boot](https://github.com/dperezcabrera/pico-boot), you don't ne
 from pico_boot import init
 
 # pico_celery is automatically loaded — no need to include it in modules!
-container = init(modules=["my_app.services", "my_app.tasks", "my_app.clients"], config=cfg)
+container = init(modules=["my_app"], config=cfg)
 ```
 
 ---
