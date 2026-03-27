@@ -51,7 +51,7 @@ async def test_send_email_with_container():
             "backend_url": "cache+memory://",
         }
     }))
-    container = init(modules=["myapp.tasks"], config=config)
+    container = init(modules=["myapp"], config=config)  # scans recursively
 
     tasks = await container.aget(EmailTasks)
     result = await tasks.send_email("user@example.com", "Hello", "Body")

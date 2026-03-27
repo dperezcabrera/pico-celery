@@ -183,7 +183,7 @@ class MyClient:
 ```python
 from pico_ioc import init
 
-container = init(modules=["myapp.tasks"], config=config)
+container = init(modules=["myapp"], config=config)  # scans recursively
 ```
 
 If using `pico-boot`, verify that your package is listed in the `pico_boot.modules` entry point in `pyproject.toml`.
