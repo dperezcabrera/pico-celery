@@ -1,4 +1,5 @@
 from pico_ioc import component
+
 from pico_celery import task
 
 

@@ -1,5 +1,6 @@
 from pico_boot import init
-from pico_ioc import configuration, YamlTreeSource
+from pico_ioc import YamlTreeSource, configuration
+
 from pico_celery import celery
 
 
@@ -14,7 +15,7 @@ def multiply(x: int, y: int) -> int: ...
 def main():
     config = configuration(YamlTreeSource("config.yml"))
 
-    container = init(
+    init(
         modules=[__name__],
         config=config,
     )

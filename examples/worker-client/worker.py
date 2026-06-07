@@ -1,5 +1,6 @@
+from celery import Celery
 from pico_boot import init
-from pico_ioc import configuration, YamlTreeSource
+from pico_ioc import YamlTreeSource, configuration
 
 config = configuration(YamlTreeSource("config.yml"))
 
@@ -9,6 +10,4 @@ container = init(
 )
 
 # Get the Celery app instance for the worker
-from celery import Celery
-
 celery_app = container.get(Celery)

@@ -8,7 +8,7 @@
 curl -sL https://raw.githubusercontent.com/dperezcabrera/pico-skills/main/install.sh | bash -s -- celery
 ```
 
-Or install all pico-framework skills:
+Or install all pico skills:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/dperezcabrera/pico-skills/main/install.sh | bash
@@ -47,7 +47,7 @@ Creates a new pico-ioc component with dependency injection. Use when adding serv
 
 ### `/add-tests`
 
-Generates tests for existing pico-framework components. Creates unit tests for tasks and services.
+Generates tests for existing pico components. Creates unit tests for tasks and services.
 
 ```
 /add-tests EmailWorker
