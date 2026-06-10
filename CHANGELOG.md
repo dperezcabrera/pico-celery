@@ -7,6 +7,22 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.2.2] - 2026-06-10
+
+### Added
+- **PEP 561**: `py.typed` marker — the package now advertises inline type information to type checkers.
+- **Docs**: full API docstrings, mkdocstrings API reference, how-to guides, testing guide, and Mermaid diagrams.
+- **Tests**: coverage for the `ThreadPoolExecutor` path in the task wrapper.
+
+### Changed
+- **Docs**: recommend the root-module pattern — `init(modules=["myapp"])` scans recursively instead of listing submodules.
+- **Quality**: ruff complexity rules (C901, PLR1702); deduplicated `cleanup_sqlite_broker` fixture into conftest.
+
+### Fixed
+- **Packaging**: removed tracked `_version.py` (now generated and ignored).
+
+---
+
 ## [0.2.1] - 2025-02-04
 
 ### Changed
