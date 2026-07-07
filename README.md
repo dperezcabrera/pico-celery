@@ -1,4 +1,4 @@
-# 📦 pico-celery
+# pico-celery
 
 [![PyPI](https://img.shields.io/pypi/v/pico-celery.svg)](https://pypi.org/project/pico-celery/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/dperezcabrera/pico-celery)
@@ -17,17 +17,17 @@
 
 It lets you define Celery tasks as **async methods inside IoC-managed components**, with automatic discovery, dependency injection, and container-scoped execution.
 
-> 🐍 Requires Python 3.11+
-> ⚡ **Async-native**: tasks run as real `async def`, with no thread pools
-> 🔧 Works with Celery 5.x
-> 🧩 Full constructor-based DI
-> 🚀 Perfect for FastAPI apps, worker daemons, and distributed pipelines
+> Requires Python 3.11+
+> **Async-native**: tasks run as real `async def`, with no thread pools
+> Works with Celery 5.x
+> Full constructor-based DI
+> Perfect for FastAPI apps, worker daemons, and distributed pipelines
 
 With pico-celery, you get predictable scoping, a clean separation of concerns, and a unified dependency model across HTTP, CLI, and background execution.
 
 ---
 
-## 🎯 Why pico-celery?
+## Why pico-celery?
 
 Celery is powerful, but typical usage introduces:
 
@@ -57,7 +57,7 @@ Celery is powerful, but typical usage introduces:
 
 ---
 
-## 🧱 Core Features
+## Core Features
 
 * **`@task`** decorator for async component methods
 * **`@celery`** and **`@send_task`** decorators for declarative, injectable clients
@@ -71,7 +71,7 @@ Celery is powerful, but typical usage introduces:
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 pip install pico-celery
@@ -91,7 +91,7 @@ pip install celery[redis]
 
 ---
 
-## 🚀 Quick Example
+## Quick Example
 
 This example shows both a *worker* and a *client* that sends the task.
 
@@ -205,7 +205,7 @@ async def create_user_endpoint(username: str, email: str):
 
 ---
 
-## 🔌 Even Simpler with pico-boot
+## Even Simpler with pico-boot
 
 If you use [pico-boot](https://github.com/dperezcabrera/pico-boot), you don't need to register `"pico_celery"` in your modules list. It is automatically discovered via entry points:
 
@@ -218,7 +218,7 @@ container = init(modules=["my_app"], config=cfg)
 
 ---
 
-## 🔄 Task Execution Semantics (Worker)
+## Task Execution Semantics (Worker)
 
 When Celery receives a task:
 
@@ -245,7 +245,7 @@ await self.user_service.create(...)
 
 ---
 
-## 🧪 Testing with Pico-IoC
+## Testing with Pico-IoC
 
 You can test your task logic just like any other component, **with no Celery worker needed**.
 
@@ -287,7 +287,7 @@ async def test_user_task_logic(mock_user_service):
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 * **`@task`** (in `decorators.py`) flags `async` methods inside components.
 * **`PicoTaskRegistrar`** (in `registrar.py`) is a component that scans IoC metadata upon configuration.
@@ -300,7 +300,7 @@ async def test_user_task_logic(mock_user_service):
 
 ---
 
-## 💡 Architecture Overview
+## Architecture Overview
 
 `pico-celery` manages both sides: the **Worker** (execution) and the **Client** (sending).
 
@@ -372,7 +372,7 @@ See [pico-skills](https://github.com/dperezcabrera/pico-skills) for details.
 
 ---
 
-## 📝 License
+## License
 
 MIT
 
