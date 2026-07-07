@@ -209,3 +209,4 @@ __marimo__/
 # Releases
 manage.sh
 _version.py
+releases/
