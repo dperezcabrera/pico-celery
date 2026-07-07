@@ -134,19 +134,14 @@ def celery(cls: Optional[type] = None, *, scope: str = "singleton", **kwargs: An
         for name, method in inspect.getmembers(c, inspect.isfunction):
             if hasattr(method, PICO_CELERY_SENDER_META):
                 has_send_tasks = True
-                setattr(method, "_needs_interception", True)
+                intercepted_method = intercepted_by(CeleryClientInterceptor)(method)
+                setattr(c, name, intercepted_method)
 
             if hasattr(method, PICO_CELERY_METHOD_META):
                 has_worker_tasks = True
 
         if not has_send_tasks and not has_worker_tasks:
             raise ValueError(f"No @send_task or @task methods found on {c.__name__}")
-
-        if has_send_tasks:
-            for name, method in inspect.getmembers(c, inspect.isfunction):
-                if getattr(method, "_needs_interception", False):
-                    intercepted_method = intercepted_by(CeleryClientInterceptor)(method)
-                    setattr(c, name, intercepted_method)
 
         return component(c, scope=scope, **kwargs)
 
