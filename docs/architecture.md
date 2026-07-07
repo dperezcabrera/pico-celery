@@ -321,17 +321,17 @@ It does *not* attempt to:
 
 Use **pico-celery** if you need:
 
-✔ Consistent DI across web, CLI, and workers
-✔ Clean separation between transport and logic
-✔ Declarative task clients
-✔ Isolated task handlers
-✔ Testable and mockable dependencies
+Consistent DI across web, CLI, and workers
+Clean separation between transport and logic
+Declarative task clients
+Isolated task handlers
+Testable and mockable dependencies
 
 Avoid it if your app:
 
-✖ Uses only standalone function tasks
-✖ Doesn’t use Pico-IoC
-✖ Must run strictly synchronous
+Uses only standalone function tasks
+Doesn’t use Pico-IoC
+Must run strictly synchronous
 
 ---
 
