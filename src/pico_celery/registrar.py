@@ -91,7 +91,15 @@ class PicoTaskRegistrar:
 
         def sync_task_executor(*args: Any, **kwargs: Any) -> Any:
             async def run_task_logic() -> Any:
-                component_instance = await container.aget(component_cls)
+                try:
+                    component_instance = await container.aget(component_cls)
+                except Exception as exc:
+                    # Without this, a DI failure surfaces in the worker log as a
+                    # bare traceback with no hint of which task or component.
+                    raise RuntimeError(
+                        f"Failed to resolve component {component_cls.__name__} "
+                        f"for Celery task method {method_name}(): {exc}"
+                    ) from exc
                 task_method = getattr(component_instance, method_name)
                 return await task_method(*args, **kwargs)
 
