@@ -51,6 +51,9 @@ Repository = "https://github.com/dperezcabrera/pico-celery"
 Changelog = "https://github.com/dperezcabrera/pico-celery/blob/main/CHANGELOG.md"
 "Issue Tracker" = "https://github.com/dperezcabrera/pico-celery/issues"
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
