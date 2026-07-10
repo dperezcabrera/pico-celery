@@ -307,7 +307,7 @@ stateDiagram-v2
 * Provide declarative, injectable clients for sending tasks.
 * Allow services, repos, and domain logic to be reused across layers.
 * Keep task handlers lightweight and framework-free.
-* Support clean architecture (Celery → transport, IoC → composition).
+* Support clean architecture (Celery  transport, IoC  composition).
 
 It does *not* attempt to:
 
