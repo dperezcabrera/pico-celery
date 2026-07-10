@@ -1,0 +1,23 @@
+# pico-celery
+
+> Seamless integration between Pico-IoC and Celery for distributed task processing
+
+## Docs
+
+- [Home](https://dperezcabrera.github.io/pico-celery/)
+- [Getting Started](https://dperezcabrera.github.io/pico-celery/getting-started/)
+- [Architecture](https://dperezcabrera.github.io/pico-celery/architecture/)
+- [Retry with Backoff](https://dperezcabrera.github.io/pico-celery/how-to/retry/)
+- [Testing Without a Broker](https://dperezcabrera.github.io/pico-celery/how-to/testing/)
+- [Periodic Tasks](https://dperezcabrera.github.io/pico-celery/how-to/periodic-tasks/)
+- [API Reference](https://dperezcabrera.github.io/pico-celery/reference/)
+- [AI Coding Skills](https://dperezcabrera.github.io/pico-celery/skills/)
+- [FAQ](https://dperezcabrera.github.io/pico-celery/faq/)
+- [Troubleshooting](https://dperezcabrera.github.io/pico-celery/troubleshooting/)
+
+## For agents
+
+- [Full docs in one file](https://dperezcabrera.github.io/pico-celery/llms-full.txt)
+- [AGENTS.md (conventions and boundaries)](https://raw.githubusercontent.com/dperezcabrera/pico-celery/main/AGENTS.md)
+- [Flagship use case (whole ecosystem wired)](https://dperezcabrera.github.io/pico-boot/flagship/)
+- [PyPI](https://pypi.org/project/pico-celery/)
