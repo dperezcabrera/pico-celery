@@ -1,8 +1,7 @@
 import pytest
 from celery import Celery
-from pico_ioc import DictSource, component, configuration, init
-
-from pico_celery import CeleryClient, celery, send_task, task
+from pico_ioc import DictSource, configuration, init
+from tests.user_components import UserService
 
 TEST_DB_PATH = "/tmp/celery_test_e2e_broker.db"
 BROKER_URL = f"sqla+sqlite:///{TEST_DB_PATH}"
@@ -12,31 +11,7 @@ cfg = configuration(
     DictSource({"celery": {"broker_url": BROKER_URL, "backend_url": BACKEND_URL, "task_track_started": False}})
 )
 
-
-@component(scope="prototype")
-class UserTasks:
-    @task(name="tasks.create_user")
-    async def create_user(self, username: str, email: str) -> dict:
-        return {"id": 123, "username": username, "email": email}
-
-
-@celery
-class UserTaskClient(CeleryClient):
-    @send_task("tasks.create_user")
-    def create_user(self, username: str, email: str):
-        pass
-
-
-@component
-class UserService:
-    def __init__(self, client: UserTaskClient):
-        self.client = client
-
-    def create_user_async(self, username: str, email: str):
-        return self.client.create_user(username, email)
-
-
-container = init(modules=["pico_celery", __name__], config=cfg)
+container = init(modules=["pico_celery", "tests.user_components"], config=cfg)
 
 celery_app = container.get(Celery)
 
