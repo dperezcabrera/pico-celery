@@ -7,6 +7,14 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 
 ---
 
+## [0.2.3] - 2026-07-12
+
+### Changed
+- Clearer worker-side failure: when a task's component cannot be resolved through the container, the error now names the component class and task method instead of surfacing a bare traceback.
+- `@celery` wires the client interceptor in a single scan pass (no temporary `_needs_interception` marker attribute left on methods).
+
+---
+
 ## [0.2.2] - 2026-06-10
 
 ### Added
