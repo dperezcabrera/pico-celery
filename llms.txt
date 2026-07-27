@@ -1,0 +1,46 @@
+# pico-celery
+
+> Seamless integration between Pico-IoC and Celery for distributed task processing
+
+Install: `pip install pico-celery`. Import surface: `from pico_celery import ...`.
+
+## Usage
+
+```python
+# my_app/tasks.py
+from pico_ioc import component
+from pico_celery import task
+from my_app.services import UserService  # Your business logic
+
+@component(scope="prototype")
+class UserTasks:
+    def __init__(self, user_service: UserService):
+        self.user_service = user_service
+
+    @task(name="tasks.create_user")
+    async def create_user(self, username: str, email: str) -> dict:
+        # Real async logic with injected dependencies
+        user = await self.user_service.create(username, email)
+        return user.to_dict()
+```
+
+## Public API
+
+- `task(name: str, **celery_options: Any)` — Mark an async method as a Celery task.
+- `send_task(name: str, **celery_options: Any)` — Mark a method as a Celery task sender.
+- `celery(cls: Optional[type]=None, *, scope: str='singleton', **kwargs: Any)` — Class decorator that registers a Celery client or worker component.
+- `class CeleryClient(Protocol)` — Marker protocol for Celery client classes.
+- `class CeleryClientInterceptor(MethodInterceptor)` — AOP interceptor that converts method calls into ``send_task`` invocations.
+- `class CelerySettings` — Settings required to create a Celery application instance.
+- `class CeleryFactory` — IoC factory that provides a singleton ``Celery`` application.
+- `class PicoTaskRegistrar` — Discovers ``@task`` methods and registers them with the Celery app.
+
+## Docs
+
+- docs/architecture.md
+- docs/faq.md
+- docs/getting-started.md
+- docs/how-to/ (3 pages)
+- docs/reference/ (1 pages)
+- docs/skills.md
+- docs/troubleshooting.md
