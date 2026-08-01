@@ -60,7 +60,7 @@ The `CeleryClientInterceptor` intercepts method calls and converts them into `ce
 ### 4. Initialize and use
 
 ```python
-from pico_ioc import init
+from pico_boot import init
 
 container = init(modules=["myapp"], config=config)
 
