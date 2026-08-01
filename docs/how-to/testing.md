@@ -2,6 +2,12 @@
 
 This guide covers strategies for unit-testing pico-celery worker tasks and client senders without running a live message broker.
 
+The container-based examples use the `make_container` fixture from
+[pico-testing](https://github.com/dperezcabrera/pico-testing) (`pip install
+pico-testing`, no conftest wiring needed). It disables plugin auto-discovery
+per test, so a suite cannot start passing or failing because of an unrelated
+pico package installed in the venv.
+
 ## Testing Worker Tasks
 
 Because pico-celery tasks are regular `async def` methods on pico-ioc `@component` classes, you can test them by instantiating the component directly and calling the method.
@@ -40,18 +46,16 @@ For integration-style tests you can wire the container with mock dependencies:
 import pytest
 from unittest.mock import AsyncMock
 
-from pico_ioc import init, configuration, DictSource
 from myapp.tasks import EmailTasks
 
+CELERY_CONFIG = {"celery": {"broker_url": "memory://", "backend_url": "cache+memory://"}}
+
 @pytest.mark.asyncio
-async def test_send_email_with_container():
-    config = configuration(DictSource({
-        "celery": {
-            "broker_url": "memory://",
-            "backend_url": "cache+memory://",
-        }
-    }))
-    container = init(modules=["myapp"], config=config)  # scans recursively
+async def test_send_email_with_container(make_container):
+    # make_container comes from pico-testing: plugin auto-discovery is off, so
+    # only the modules listed here are loaded, and the container is shut down
+    # on teardown.
+    container = make_container("pico_celery", "myapp", config=CELERY_CONFIG)
 
     tasks = await container.aget(EmailTasks)
     result = await tasks.send_email("user@example.com", "Hello", "Body")
@@ -114,17 +118,10 @@ import pytest
 from unittest.mock import MagicMock
 
 from celery import Celery
-from pico_ioc import init, configuration, DictSource
 
 @pytest.mark.asyncio
-async def test_task_registration():
-    config = configuration(DictSource({
-        "celery": {
-            "broker_url": "memory://",
-            "backend_url": "cache+memory://",
-        }
-    }))
-    container = init(modules=["myapp"], config=config)
+async def test_task_registration(make_container):
+    container = make_container("pico_celery", "myapp", config=CELERY_CONFIG)
 
     celery_app = container.get(Celery)
 
@@ -140,18 +137,11 @@ For a full integration test of the client path:
 import pytest
 from unittest.mock import MagicMock
 
-from pico_ioc import init, configuration, DictSource
 from myapp.clients import NotificationClient
 
 @pytest.mark.asyncio
-async def test_client_integration():
-    config = configuration(DictSource({
-        "celery": {
-            "broker_url": "memory://",
-            "backend_url": "cache+memory://",
-        }
-    }))
-    container = init(modules=["myapp"], config=config)
+async def test_client_integration(make_container):
+    container = make_container("pico_celery", "myapp", config=CELERY_CONFIG)
 
     client = await container.aget(NotificationClient)
     result = client.notify(user_id=42, msg="Hello")

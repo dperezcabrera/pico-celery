@@ -181,7 +181,7 @@ class MyClient:
 **Fix:** Ensure your task modules are included in the `modules` list when initialising the container:
 
 ```python
-from pico_ioc import init
+from pico_boot import init
 
 container = init(modules=["myapp"], config=config)  # scans recursively
 ```

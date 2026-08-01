@@ -141,7 +141,8 @@ This file (`worker.py`) is what Celery will use to boot up.
 
 ```python
 # my_app/worker.py
-from pico_ioc import init, configuration, DictSource
+from pico_boot import init
+from pico_ioc import configuration, DictSource
 from celery import Celery
 
 # Your application's configuration (broker, backend, etc.)
@@ -153,8 +154,8 @@ cfg = configuration(DictSource({
 }))
 
 # Modules to scan for @component, @task, @celery
+# pico_celery itself is auto-discovered via its entry point: do not list it.
 modules = [
-    "pico_celery",
     "my_app.services",
     "my_app.tasks",
     "my_app.clients"
@@ -185,7 +186,6 @@ Your web API (e.g., FastAPI) can now inject the `UserTaskClient` and use it.
 ```python
 # my_app/main.py
 from fastapi import FastAPI
-from pico_ioc import init
 from my_app.clients import UserTaskClient
 from my_app.worker import container  # Reuse the worker's container
 
