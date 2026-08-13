@@ -17,7 +17,7 @@
 
 It lets you define Celery tasks as **async methods inside IoC-managed components**, with automatic discovery, dependency injection, and container-scoped execution.
 
-> Requires Python 3.11+
+> Requires Python 3.11+ (tested on 3.11, 3.12, 3.13 and 3.14)
 > **Async-native**: tasks run as real `async def`, with no thread pools
 > Works with Celery 5.x
 > Full constructor-based DI

@@ -11,7 +11,7 @@ Pico-Celery integrates pico-ioc with Celery 5, enabling dependency injection for
 
 ### What Python versions are supported?
 
-Pico-Celery requires Python 3.11 or later.
+Pico-Celery requires Python 3.11 or later. Every release is tested on 3.11, 3.12, 3.13 and 3.14.
 
 ## Worker Side
 
