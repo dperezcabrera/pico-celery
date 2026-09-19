@@ -1,9 +1,16 @@
+import os
+import tempfile
+
 import pytest
 from celery import Celery
 from pico_ioc import DictSource, configuration, init
 from tests.user_components import UserService
 
-TEST_DB_PATH = "/tmp/celery_test_e2e_broker.db"
+# The worker subprocess imports this module too, so the path travels in the environment;
+# a fixed /tmp path made concurrent runs share one broker file.
+TEST_DB_PATH = os.environ.setdefault(
+    "PICO_CELERY_E2E_DB", os.path.join(tempfile.mkdtemp(prefix="pico-celery-"), "broker.db")
+)
 BROKER_URL = f"sqla+sqlite:///{TEST_DB_PATH}"
 BACKEND_URL = f"db+sqlite:///{TEST_DB_PATH}"
 
