@@ -38,8 +38,8 @@ classifiers = [
 
 
 dependencies = [
-    "pico-ioc >= 2.2.0", 
-    "celery>=5.3,<6.0",
+    "pico-ioc >= 2.3.3", 
+    "celery>=5.5,<6.0",
 ]
 
 [project.optional-dependencies]
