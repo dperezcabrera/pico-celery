@@ -9,6 +9,8 @@ and this project adheres to Semantic Versioning (https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-09-29
+
 ### Fixed
 
 - Dependency floors raised to what the test suite proves: `pico-ioc >= 2.3.3` (was 2.2.0) and `celery >= 5.5` (was 5.3; below 5.5 the database result backend fails with `no such table: celery_taskmeta`). A new CI job runs the suite with every declared floor pinned, so a floor that installs but does not work can no longer ship.
